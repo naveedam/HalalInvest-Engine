@@ -1098,6 +1098,44 @@ export default function App() {
                       <span className={`font-mono font-extrabold ${totalAllocatedWeight === 100 ? "text-emerald-600" : "text-amber-600"}`}>
                         {totalAllocatedWeight}% {totalAllocatedWeight === 100 ? "✓ (Balanced)" : "⚠️ (Adjust weights to 100%)"}
                       </span>
+
+                    {/* --- PREMIUM BROKERAGE TRANSACTION INTERACTION GATEWAY --- */}
+                    <div className="mt-4 pt-4 border-t border-slate-100 bg-slate-50/70 p-4 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                          <span>🛡️</span>
+                          <span>Deploy This Smallcase Basket</span>
+                        </h4>
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          Execute your custom halal SIP allocation instantly across premium authorized Indian broker networks.
+                        </p>
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                        <button 
+                          type="button"
+                          onClick={() => window.open("https://kite.zerodha.com", "_blank")}
+                          className="px-3 py-1.5 bg-white border border-slate-200 hover:border-orange-500 rounded-lg text-[11px] font-bold text-slate-700 transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          Zerodha Kite
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => window.open("https://groww.in", "_blank")}
+                          className="px-3 py-1.5 bg-white border border-slate-200 hover:border-emerald-500 rounded-lg text-[11px] font-bold text-slate-700 transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          Groww
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => alert("Initializing secure Smallcase SDK Gateway...")}
+                          className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-extrabold transition-all cursor-pointer"
+                        >
+                          One-Click Execute 🚀
+                        </button>
+                      </div>
+                    </div>
+
                     </div>
                   </div>
                 )}
