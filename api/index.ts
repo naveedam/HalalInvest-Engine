@@ -1,22 +1,9 @@
-import axios from "axios";
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import dotenv from "dotenv";
-import { createServer as createViteServer } from "vite";
-
-// Load environment variables
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import axios from "axios";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
 app.use(express.json());
 
-// Strict Shariah Compliance Rule Presets (AAOIFI Standard Defaults)
 const DEFAULT_CRITERIA = {
   maxIncidentalRevenuePercentage: 5,
   maxDebtToAssetsPercentage: 33,
@@ -35,7 +22,6 @@ const PROHIBITED_SECTORS = [
   "entertainment", "cinema", "broadcasting", "music"
 ];
 
-// Seed-based generator for metrics validation
 function generateFallbackStockData(query: string, preferredCountry: "US" | "IN") {
   const cleanQuery = query.trim();
   const ticker = cleanQuery.toUpperCase().split(/\s+/)[0].replace(/[^A-Z]/g, "") || "UNKNOWN";
@@ -79,29 +65,27 @@ function generateFallbackStockData(query: string, preferredCountry: "US" | "IN")
   };
 }
 
-// Backend Processing Core Router Endpoint
-app.post("/api/v1/screen", async (req, res) => {
+// Router map matching out root serverless invocations precisely
+app.all("*", async (req, res) => {
   try {
-    const { ticker, market, criteria } = req.body;
-    if (!ticker) return res.status(400).json({ error: "Stock ticker is required." });
+    const { ticker, market, criteria } = req.body || {};
+    if (!ticker) return res.status(200).json({ success: false, error: "Stock ticker is required." });
 
     const activeLimits = {
       maxDebt: criteria?.maxDebtRatio ?? DEFAULT_CRITERIA.maxDebtToAssetsPercentage,
       maxReceivables: criteria?.maxReceivablesRatio ?? DEFAULT_CRITERIA.maxReceivablesToAssetsPercentage,
-      maxRevenue: criteria?.maxRevenueRatio ?? DEFAULT_CRITERIA.maxNonCompliantRevenue
+      maxRevenue: criteria?.maxRevenueRatio ?? DEFAULT_CRITERIA.maxIncidentalRevenuePercentage
     };
 
-        // --- LIVE DATA FETCHING OR SIMULATED FALLBACK LAYER ---
     let stockProfile: any;
 
     if (market === "IN") {
       try {
-        console.log(`📡 Fetching live NSE financials for: ${ticker}`);
         const apiResponse = await axios.get(`https://indianapi.in/api/v2/financials/${ticker.toUpperCase()}`, {
-          headers: { "X-API-Key": process.env.INDIAN_API_KEY || "" }
+          headers: { "X-API-Key": process.env.INDIAN_API_KEY || "" },
+          timeout: 4000
         });
         const liveData = apiResponse.data;
-
         stockProfile = {
           ticker: ticker.toUpperCase(),
           companyName: liveData.company_name || `${ticker.toUpperCase()} Ltd`,
@@ -115,16 +99,13 @@ app.post("/api/v1/screen", async (req, res) => {
           dividendPerShare: parseFloat(liveData.key_metrics.dividend_per_share || 0),
           nonCompliantOperatingPercentage: (parseFloat(liveData.pnl.other_income_interest || 0) / parseFloat(liveData.pnl.total_revenue || 1)) * 100
         };
-        console.log("✅ Live balance sheet loaded successfully into memory.");
       } catch (apiError) {
-        console.warn("⚠️ Live API call bypassed. Using high-fidelity seeded fallback module.");
         stockProfile = generateFallbackStockData(ticker, "IN");
       }
     } else {
       stockProfile = generateFallbackStockData(ticker, "US");
     }
 
-    // --- CORE QUANTITATIVE MATHEMATICAL PROCESSING ---
     const totalAssets = stockProfile.totalAssets;
     const debtRatio = (stockProfile.totalDebt / totalAssets) * 100;
     const receivablesRatio = (stockProfile.accountsReceivable / totalAssets) * 100;
@@ -140,7 +121,6 @@ app.post("/api/v1/screen", async (req, res) => {
 
     const purificationRatio = nonHalalRevenueRatio / 100;
     const purificationDeductionPerShare = stockProfile.dividendPerShare * purificationRatio;
-
 
     return res.status(200).json({
       ticker: stockProfile.ticker,
@@ -161,32 +141,8 @@ app.post("/api/v1/screen", async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Backend screening execution failed:", error);
-    return res.status(500).json({ error: "Internal compliance execution error." });
+    return res.status(200).json({ success: false, error: "Internal compliance engine failure calculation mapping." });
   }
 });
 
-// Full-Stack Dev/Prod Pipeline Gateway Setup
-async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
-    // Correctly initialize Vite inside pure ES modules lifecycle
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    
-    app.use(vite.middlewares);
-    console.log("⚡ Vite Asset compiler piped into server container middleware");
-  } else {
-    app.use(express.static(path.join(__dirname, "dist")));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(__dirname, "dist", "index.html"));
-    });
-  }
-
-  app.listen(PORT, () => {
-    console.log(`🚀 Core processing server listening on port ${PORT}`);
-  });
-}
-
-startServer().catch((err) => console.error("Server init failure:", err));
+export default app;
