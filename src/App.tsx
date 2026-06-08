@@ -51,6 +51,8 @@ export default function App() {
   // Purification calculator state
   const [dividendReceived, setDividendReceived] = useState<string>("100000");
   const [purificationResult, setPurificationResult] = useState<number>(0);
+  const [watchlist, setWatchlist] = useState<string[]>(() => JSON.parse(localStorage.getItem("screener_watchlist") || "[]"));
+  useEffect(() => { localStorage.setItem("screener_watchlist", JSON.stringify(watchlist)); }, [watchlist]);
 
   // Sync initial stock with chosen market region country selection
   useEffect(() => {
