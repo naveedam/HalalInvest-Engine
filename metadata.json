@@ -1,0 +1,6 @@
+{
+  "name": "Shariah Stock Identifier",
+  "description": "An interactive stock screener that analyzes and filters assets for Shariah compliance based on debt-to-equity ratios, non-compliant revenue sources, cash, and receivables using real-time financial search.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
