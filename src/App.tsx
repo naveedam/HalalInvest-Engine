@@ -53,6 +53,27 @@ export default function App() {
   const [purificationResult, setPurificationResult] = useState<number>(0);
   const [watchlist, setWatchlist] = useState<string[]>(() => JSON.parse(localStorage.getItem("screener_watchlist") || "[]"));
   useEffect(() => { localStorage.setItem("screener_watchlist", JSON.stringify(watchlist)); }, [watchlist]);
+  // --- HALAL SMALLCASE / BASKET ALLOCATION ENGINE STATE ---
+  const [basketWeights, setBasketWeights] = useState<Record<string, number>>({});
+  const [sipAmount, setSipAmount] = useState<string>("25000");
+
+  // Automatically distribute uniform weights when assets enter the watchlist basket
+  useEffect(() => {
+    if (watchlist.length === 0) return;
+    const uniformWeight = Math.floor(100 / watchlist.length);
+    const newWeights: Record<string, number> = {};
+    watchlist.forEach(ticker => {
+      newWeights[ticker] = basketWeights[ticker] || uniformWeight;
+    });
+    setBasketWeights(newWeights);
+  }, [watchlist]);
+
+  const updateWeight = (ticker: string, value: number) => {
+    setBasketWeights({ ...basketWeights, [ticker]: value });
+  };
+
+  const totalAllocatedWeight = Object.values(basketWeights).reduce((a, b) => a + b, 0);
+
 
   // Sync initial stock with chosen market region country selection
   useEffect(() => {
@@ -996,6 +1017,92 @@ export default function App() {
                   ))}
                 </div>
               </div>
+
+                            {/* --- CUSTOM SHARIAH SMALLCASE & SIP CONTROLLER --- */}
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                  <div>
+                    <h3 className="font-heading font-bold text-slate-900 text-base flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-emerald-600" />
+                      <span>Custom Halal Smallcase Basket</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Group compliant assets, customize your equity weight multipliers, and automate SIP routing math.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-500 font-mono">Monthly SIP Target:</span>
+                    <div className="relative max-w-[130px]">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                      <input 
+                        type="number" 
+                        value={sipAmount} 
+                        onChange={(e) => setSipAmount(e.target.value)}
+                        className="w-full pl-6 pr-2 py-1.5 border border-slate-200 bg-slate-50 font-mono text-xs rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {watchlist.length === 0 ? (
+                  <div className="text-center py-8 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                    <BookOpen className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <h4 className="text-xs font-bold text-slate-700">Your Smallcase is Empty</h4>
+                    <p className="text-[11px] text-slate-400 max-w-xs mx-auto mt-0.5">
+                      Search custom tickers above and click "+ Add to Portfolio" to build your target allocation matrix.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {watchlist.map((ticker) => {
+                      const allocatedWeight = basketWeights[ticker] || 0;
+                      const allocatedSipCash = (parseFloat(sipAmount) || 0) * (allocatedWeight / 100);
+                      
+                      return (
+                        <div key={ticker} className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3 min-w-[100px]">
+                            <span className="font-mono font-bold bg-white border border-slate-200 px-2 py-1 rounded text-slate-900 text-xs shadow-2xs">
+                              {ticker}
+                            </span>
+                            <span className="text-[11px] text-slate-400 font-bold font-mono">
+                              ₹{allocatedSipCash.toLocaleString("en-IN", { maximumFractionDigits: 0 })} /mo
+                            </span>
+                          </div>
+                          
+                          <div className="flex-1 max-w-xs flex items-center gap-2">
+                            <input 
+                              type="range" 
+                              min="0" 
+                              max="100" 
+                              value={allocatedWeight}
+                              onChange={(e) => updateWeight(ticker, parseInt(e.target.value) || 0)}
+                              className="w-full accent-emerald-600 h-1"
+                            />
+                            <span className="font-mono text-xs font-bold text-slate-700 w-10 text-right">
+                              {allocatedWeight}%
+                            </span>
+                          </div>
+
+                          <button 
+                            onClick={() => setWatchlist(watchlist.filter(t => t !== ticker))}
+                            className="text-[11px] font-bold text-slate-400 hover:text-rose-600 transition-colors px-1 cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      );
+                    })}
+
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-500">Total Allocated Weight:</span>
+                      <span className={`font-mono font-extrabold ${totalAllocatedWeight === 100 ? "text-emerald-600" : "text-amber-600"}`}>
+                        {totalAllocatedWeight}% {totalAllocatedWeight === 100 ? "✓ (Balanced)" : "⚠️ (Adjust weights to 100%)"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
 
               {/* FINANCIAL AUDIT LEDGER */}
               <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-4">
