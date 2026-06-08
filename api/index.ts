@@ -52,7 +52,7 @@ function generateFallbackStockData(query: string, preferredCountry: "US" | "IN")
 
   return {
     ticker,
-    companyName: `${ticker} Industrial Corp`,
+    companyName: `${ticker.toUpperCase()} Ltd`,
     sector,
     country,
     totalAssets,
