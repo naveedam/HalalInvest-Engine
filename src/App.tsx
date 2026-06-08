@@ -745,6 +745,20 @@ export default function App() {
                           <span>Non-Compliant</span>
                         </>
                       )}
+
+                  {/* --- INTERACTIVE PORTFOLIO SMALLCASE BASKET INJECTION BUTTON --- */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedStock && !watchlist.includes(selectedStock.ticker)) {
+                        setWatchlist([...watchlist, selectedStock.ticker]);
+                      }
+                    }}
+                    className="mt-2 w-full sm:w-auto px-4 py-1.5 bg-slate-950 hover:bg-slate-800 text-white font-bold text-[11px] rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+                  >
+                    ➕ Add to Smallcase Basket
+                  </button>
+
                     </span>
                   </div>
                 </div>
