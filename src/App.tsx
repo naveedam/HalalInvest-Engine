@@ -1046,6 +1046,17 @@ export default function App() {
 
                 {watchlist.length === 0 ? (
                   <div className="text-center py-8 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+
+                {/* --- QUICK TEST INJECTION ACCESS LAYER --- */}
+                <div className="p-3 bg-slate-100 rounded-xl flex items-center justify-between gap-2 mb-2">
+                  <span className="text-xs font-bold text-slate-600">Quick Test Sync:</span>
+                  <div className="flex gap-1.5">
+                    <button type="button" onClick={() => { setWatchlist([...new Set([...watchlist, "RELIANCE"])]) }} className="px-2.5 py-1 bg-white border border-slate-300 rounded text-[11px] font-bold text-slate-800 cursor-pointer">+ Reliance</button>
+                    <button type="button" onClick={() => { setWatchlist([...new Set([...watchlist, "TCS"])]) }} className="px-2.5 py-1 bg-white border border-slate-300 rounded text-[11px] font-bold text-slate-800 cursor-pointer">+ TCS</button>
+                    <button type="button" onClick={() => { setWatchlist([...new Set([...watchlist, "INFY"])]) }} className="px-2.5 py-1 bg-white border border-slate-300 rounded text-[11px] font-bold text-slate-800 cursor-pointer">+ Infosys</button>
+                  </div>
+                </div>
+
                     <BookOpen className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                     <h4 className="text-xs font-bold text-slate-700">Your Smallcase is Empty</h4>
                     <p className="text-[11px] text-slate-400 max-w-xs mx-auto mt-0.5">
